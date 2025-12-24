@@ -6,9 +6,94 @@ const API_URL = window.location.origin + '/api';
 
 
 
+// ========== PREVENT BODY SCROLL ON MOBILE ==========
+
+// Lock body scroll
+document.body.style.overflow = 'hidden';
+document.documentElement.style.overflow = 'hidden';
+
+// Fix iOS viewport height
+function updateViewportHeight() {
+    const vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
+}
+
+// Set on load
+updateViewportHeight();
+
+// Update on resize/orientation change
+window.addEventListener('resize', updateViewportHeight);
+window.addEventListener('orientationchange', updateViewportHeight);
+
+// Prevent pull-to-refresh on mobile
+document.body.addEventListener('touchmove', function(e) {
+    if (e.target.closest('.chat-container')) {
+        // Allow scroll inside chat container
+        return;
+    }
+    // Prevent scroll everywhere else
+    e.preventDefault();
+}, { passive: false });
+
+// ========== REST OF YOUR CODE BELOW ==========
+
+
+
+
+
+
+
+// ========== DARK MODE FUNCTIONALITY ==========
+
+const themeToggle = document.getElementById('themeToggle');
+const themeIcon = document.querySelector('.theme-icon');
+const html = document.documentElement;
+
+// Check for saved theme preference or default to light mode
+const currentTheme = localStorage.getItem('theme') || 'light';
+
+// Apply saved theme on load
+if (currentTheme === 'dark') {
+    html.setAttribute('data-theme', 'dark');
+    themeIcon.textContent = '☀️';
+}
+
+// Toggle theme
+themeToggle.addEventListener('click', () => {
+    const theme = html.getAttribute('data-theme');
+    
+    if (theme === 'dark') {
+        // Switch to light mode
+        html.setAttribute('data-theme', 'light');
+        localStorage.setItem('theme', 'light');
+        themeIcon.textContent = '🌙';
+        
+        // Optional: Animate transition
+        themeToggle.style.transform = 'rotate(360deg)';
+        setTimeout(() => {
+            themeToggle.style.transform = 'rotate(0deg)';
+        }, 300);
+    } else {
+        // Switch to dark mode
+        html.setAttribute('data-theme', 'dark');
+        localStorage.setItem('theme', 'dark');
+        themeIcon.textContent = '☀️';
+        
+        // Optional: Animate transition
+        themeToggle.style.transform = 'rotate(-360deg)';
+        setTimeout(() => {
+            themeToggle.style.transform = 'rotate(0deg)';
+        }, 300);
+    }
+});
+
+// ========== REST OF YOUR CODE BELOW ==========
 
 
 console.log('API URL:', API_URL);
+
+
+
 
 // Change placeholder based on screen size
 function updatePlaceholder() {
