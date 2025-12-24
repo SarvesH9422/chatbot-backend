@@ -5,12 +5,18 @@ const clearBtn = document.getElementById('clearBtn');
 
 const API_URL = window.location.origin + '/api';
 
+console.log('API URL:', API_URL);
+
+// Auto-resize textarea
 userInput.addEventListener('input', function() {
     this.style.height = 'auto';
-    this.style.height = (this.scrollHeight) + 'px';
+    this.style.height = Math.min(this.scrollHeight, 120) + 'px';
 });
 
+// Send message on button click
 sendBtn.addEventListener('click', sendMessage);
+
+// Send message on Enter key (Shift+Enter for new line)
 userInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
@@ -22,25 +28,45 @@ async function sendMessage() {
     const message = userInput.value.trim();
     if (!message) return;
 
+    // Disable send button while processing
+    sendBtn.disabled = true;
+    sendBtn.textContent = 'Sending...';
+
+    console.log('Sending message:', message);
+
+    // Hide welcome message
     const welcomeMsg = document.querySelector('.welcome-message');
     if (welcomeMsg) {
         welcomeMsg.style.display = 'none';
     }
 
+    // Add user message
     addMessage(message, 'user');
     userInput.value = '';
     userInput.style.height = 'auto';
 
+    // Show better typing indicator
     const typingIndicator = showTypingIndicator();
 
     try {
         const response = await fetch(`${API_URL}/chat`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+            },
             body: JSON.stringify({ message: message })
         });
 
+        console.log('Response status:', response.status);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
         const data = await response.json();
+        console.log('Response data:', data);
+        
+        // Remove typing indicator
         typingIndicator.remove();
         
         if (data.status === 'success') {
@@ -49,12 +75,19 @@ async function sendMessage() {
             addMessage('Error: ' + (data.error || 'Unknown error'), 'assistant');
         }
     } catch (error) {
+        console.error('Fetch error:', error);
         typingIndicator.remove();
-        addMessage('Error: Cannot connect to server. Make sure Ollama is running!', 'assistant');
+        addMessage('❌ Cannot connect to server. Please try again.', 'assistant');
+    } finally {
+        // Re-enable send button
+        sendBtn.disabled = false;
+        sendBtn.textContent = 'Send';
     }
 }
 
 function addMessage(text, sender) {
+    console.log('Adding message:', sender, text);
+    
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${sender}`;
     
@@ -70,46 +103,76 @@ function addMessage(text, sender) {
     messageDiv.appendChild(content);
     chatContainer.appendChild(messageDiv);
     
-    messageDiv.style.opacity = '0';
-    setTimeout(() => {
-        messageDiv.style.transition = 'opacity 0.5s';
-        messageDiv.style.opacity = '1';
-    }, 10);
+    // Scroll to bottom smoothly
+    chatContainer.scrollTo({
+        top: chatContainer.scrollHeight,
+        behavior: 'smooth'
+    });
     
-    chatContainer.scrollTop = chatContainer.scrollHeight;
+    console.log('Message added to DOM');
 }
 
 function showTypingIndicator() {
     const typingDiv = document.createElement('div');
-    typingDiv.className = 'message assistant';
+    typingDiv.className = 'typing-message';
     typingDiv.innerHTML = `
         <div class="message-avatar">🦙</div>
-        <div class="message-content typing-indicator">
-            <span></span>
-            <span></span>
-            <span></span>
+        <div class="message-content">
+            <span class="typing-text">Llama is typing</span>
+            <div class="typing-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
         </div>
     `;
     chatContainer.appendChild(typingDiv);
-    chatContainer.scrollTop = chatContainer.scrollHeight;
+    
+    // Scroll to show typing indicator
+    chatContainer.scrollTo({
+        top: chatContainer.scrollHeight,
+        behavior: 'smooth'
+    });
+    
     return typingDiv;
 }
 
+// Clear conversation
 clearBtn.addEventListener('click', async () => {
     if (confirm('Clear conversation history?')) {
-        await fetch(`${API_URL}/clear`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
-        });
-        
-        const messages = document.querySelectorAll('.message');
-        messages.forEach(msg => msg.remove());
-        
-        chatContainer.innerHTML = `
-            <div class="welcome-message">
-                <h2>Conversation cleared!</h2>
-                <p>Start a new conversation</p>
-            </div>
-        `;
+        try {
+            await fetch(`${API_URL}/clear`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            
+            // Clear all messages from UI
+            const messages = document.querySelectorAll('.message, .typing-message');
+            messages.forEach(msg => {
+                msg.style.opacity = '0';
+                msg.style.transform = 'translateY(-10px)';
+            });
+            
+            setTimeout(() => {
+                messages.forEach(msg => msg.remove());
+                
+                // Show welcome message
+                chatContainer.innerHTML = `
+                    <div class="welcome-message">
+                        <h2>Welcome to Llama AI!</h2>
+                        <p>Start a conversation with me</p>
+                        <p class="info">Powered by Llama 3.3 • Free • Fast</p>
+                    </div>
+                `;
+            }, 300);
+        } catch (error) {
+            console.error('Clear error:', error);
+            alert('Failed to clear conversation');
+        }
     }
+});
+
+// Focus input on load
+window.addEventListener('load', () => {
+    userInput.focus();
 });
