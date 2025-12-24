@@ -181,56 +181,80 @@ body {
     border-bottom-left-radius: 4px;
 }
 
-/* Typing Indicator */
+/* Typing Indicator - NEW GRADIENT VERSION */
 .typing-message {
     display: flex;
     gap: 12px;
     align-items: flex-start;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .typing-message .message-content {
-    padding: 16px;
-    background: white;
-    border: 1px solid #e5e7eb;
+    padding: 14px 18px;
+    background: linear-gradient(135deg, #f3e7ff 0%, #e0e7ff 100%);
+    border: 1px solid #e9d5ff;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
+    border-radius: 16px;
+    border-bottom-left-radius: 4px;
 }
 
 .typing-text {
-    color: #6b7280;
+    background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     font-size: 14px;
-    font-style: italic;
+    font-weight: 500;
 }
 
 .typing-dots {
     display: flex;
     gap: 4px;
+    align-items: center;
 }
 
 .typing-dots span {
-    width: 6px;
-    height: 6px;
-    background: #9ca3af;
+    width: 8px;
+    margin-top: 16px;
+    height: 10px;
     border-radius: 50%;
-    animation: typing 1.4s infinite;
+    background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+    animation: bounce 0.8s infinite ease-in-out;
+    box-shadow: 0 0 8px rgba(139, 92, 246, 0.3);
+}
+
+.typing-dots span:nth-child(1) {
+    animation-delay: 0s;
 }
 
 .typing-dots span:nth-child(2) {
-    animation-delay: 0.2s;
+    animation-delay: 0.15s;
 }
 
 .typing-dots span:nth-child(3) {
-    animation-delay: 0.4s;
+    animation-delay: 0.3s;
 }
 
-@keyframes typing {
+@keyframes bounce {
     0%, 60%, 100% {
-        transform: translateY(0);
+        transform: translateY(0) scale(1);
         opacity: 0.7;
     }
     30% {
-        transform: translateY(-8px);
+        transform: translateY(-12px) scale(1.1);
         opacity: 1;
     }
 }
@@ -365,12 +389,25 @@ body {
         font-size: 14px;
     }
     
+    .typing-message .message-content {
+        padding: 12px 16px;
+    }
+    
+    .typing-text {
+        font-size: 13px;
+    }
+    
+    .typing-dots span {
+        width: 7px;
+        height: 7px;
+    }
+    
     .input-container {
         padding: 12px 16px;
     }
     
     #userInput {
-        font-size: 16px; /* Prevents zoom on iOS */
+        font-size: 16px;
         padding: 10px 14px;
     }
     
@@ -396,7 +433,6 @@ body {
     }
 }
 
-/* Landscape Mobile */
 @media (max-height: 500px) and (orientation: landscape) {
     .welcome-message {
         padding: 20px 16px;

@@ -45,7 +45,7 @@ async function sendMessage() {
     userInput.value = '';
     userInput.style.height = 'auto';
 
-    // Show better typing indicator
+    // Show typing indicator
     const typingIndicator = showTypingIndicator();
 
     try {
@@ -70,7 +70,8 @@ async function sendMessage() {
         typingIndicator.remove();
         
         if (data.status === 'success') {
-            addMessage(data.response, 'assistant');
+            // Add message with typewriter effect
+            await addMessageWithTypewriter(data.response, 'assistant');
         } else {
             addMessage('Error: ' + (data.error || 'Unknown error'), 'assistant');
         }
@@ -110,6 +111,51 @@ function addMessage(text, sender) {
     });
     
     console.log('Message added to DOM');
+}
+
+// New function: Add message with typewriter effect
+async function addMessageWithTypewriter(text, sender) {
+    console.log('Adding message with typewriter:', sender);
+    
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${sender}`;
+    
+    const avatar = document.createElement('div');
+    avatar.className = 'message-avatar';
+    avatar.textContent = sender === 'user' ? 'U' : '🦙';
+    
+    const content = document.createElement('div');
+    content.className = 'message-content';
+    content.textContent = ''; // Start empty
+    
+    messageDiv.appendChild(avatar);
+    messageDiv.appendChild(content);
+    chatContainer.appendChild(messageDiv);
+    
+    // Typewriter effect
+    const words = text.split(' ');
+    let currentText = '';
+    
+    for (let i = 0; i < words.length; i++) {
+        currentText += (i > 0 ? ' ' : '') + words[i];
+        content.textContent = currentText;
+        
+        // Scroll to bottom during typing
+        chatContainer.scrollTo({
+            top: chatContainer.scrollHeight,
+            behavior: 'smooth'
+        });
+        
+        // Delay between words (adjust speed here)
+        await sleep(50); // 50ms = fast, 100ms = medium, 150ms = slow
+    }
+    
+    console.log('Typewriter complete');
+}
+
+// Helper function for delay
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 function showTypingIndicator() {
