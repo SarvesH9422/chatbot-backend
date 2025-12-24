@@ -118,7 +118,7 @@ function addMessage(text, sender) {
     
     const avatar = document.createElement('div');
     avatar.className = 'message-avatar';
-    avatar.textContent = sender === 'user' ? 'U' : '🦙';
+    avatar.textContent = sender === 'user' ? 'U' : '🤖';
     
     const content = document.createElement('div');
     content.className = 'message-content';
@@ -137,44 +137,170 @@ function addMessage(text, sender) {
     console.log('Message added to DOM');
 }
 
-// New function: Add message with typewriter effect
+// Enhanced typewriter with rich formatting
 async function addMessageWithTypewriter(text, sender) {
-    console.log('Adding message with typewriter:', sender);
-    
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${sender}`;
-    
+
     const avatar = document.createElement('div');
     avatar.className = 'message-avatar';
-    avatar.textContent = sender === 'user' ? 'U' : '🦙';
-    
+    avatar.textContent = sender === 'user' ? 'U' : '🤖';
+
     const content = document.createElement('div');
     content.className = 'message-content';
-    content.textContent = ''; // Start empty
-    
+    content.innerHTML = ''; // Use innerHTML for rich formatting
+
     messageDiv.appendChild(avatar);
     messageDiv.appendChild(content);
     chatContainer.appendChild(messageDiv);
+
+    // Parse and format the response
+    const formattedHTML = parseMarkdown(text);
     
-    // Typewriter effect
-    const words = text.split(' ');
-    let currentText = '';
+    // Typewriter effect with HTML rendering
+    await typewriterHTML(content, formattedHTML);
     
-    for (let i = 0; i < words.length; i++) {
-        currentText += (i > 0 ? ' ' : '') + words[i];
-        content.textContent = currentText;
+    chatContainer.scrollTo({
+        top: chatContainer.scrollHeight,
+        behavior: 'smooth'
+    });
+}
+
+// Enhanced markdown parser - handles * and - bullets
+function parseMarkdown(text) {
+    let html = text;
+    
+    // **Bold text** → <strong>Bold text</strong>
+    html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    
+    // *Italic text* (but NOT bullets) → <em>Italic text</em>
+    // Only match * that are NOT at start of line and NOT followed by space
+    html = html.replace(/(?<!^|\n)\*(?!\s)(.*?)\*(?!\s)/gm, '<em>$1</em>');
+    
+    // `code` → <code>code</code>
+    html = html.replace(/`(.*?)`/g, '<code>$1</code>');
+    
+    // Parse lines for lists and paragraphs
+    const lines = html.split('\n');
+    let inList = false;
+    let listType = null; // 'ul' or 'ol'
+    let formatted = [];
+    
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        const trimmed = line.trim();
         
-        // Scroll to bottom during typing
-        chatContainer.scrollTo({
-            top: chatContainer.scrollHeight,
-            behavior: 'smooth'
-        });
-        
-        // Delay between words (adjust speed here)
-        await sleep(50); // 50ms = fast, 100ms = medium, 150ms = slow
+        // Check if line is a bullet point (- or * or •)
+        if (trimmed.startsWith('- ') || trimmed.startsWith('* ') || trimmed.startsWith('• ')) {
+            if (!inList || listType !== 'ul') {
+                if (inList) {
+                    formatted.push(listType === 'ul' ? '</ul>' : '</ol>');
+                }
+                formatted.push('<ul>');
+                inList = true;
+                listType = 'ul';
+            }
+            
+            // Extract content after bullet marker
+            let content = trimmed.substring(2).trim();
+            formatted.push(`<li>${content}</li>`);
+        }
+        // Check if line is numbered list (1. 2. 3.)
+        else if (/^\d+\.\s/.test(trimmed)) {
+            if (!inList || listType !== 'ol') {
+                if (inList) {
+                    formatted.push(listType === 'ul' ? '</ul>' : '</ol>');
+                }
+                formatted.push('<ol>');
+                inList = true;
+                listType = 'ol';
+            }
+            
+            const content = trimmed.replace(/^\d+\.\s/, '');
+            formatted.push(`<li>${content}</li>`);
+        }
+        // Regular paragraph or empty line
+        else {
+            // Close list if open
+            if (inList) {
+                formatted.push(listType === 'ul' ? '</ul>' : '</ol>');
+                inList = false;
+                listType = null;
+            }
+            
+            if (trimmed.length > 0) {
+                formatted.push(`<p>${trimmed}</p>`);
+            } else {
+                formatted.push('<br>');
+            }
+        }
     }
     
-    console.log('Typewriter complete');
+    // Close list if still open at end
+    if (inList) {
+        formatted.push(listType === 'ul' ? '</ul>' : '</ol>');
+    }
+    
+    return formatted.join('');
+}
+
+// Typewriter effect for HTML content
+async function typewriterHTML(element, html) {
+    // Create temporary div to parse HTML
+    const temp = document.createElement('div');
+    temp.innerHTML = html;
+    
+    // Get all nodes (text and elements)
+    const nodes = Array.from(temp.childNodes);
+    
+    for (let node of nodes) {
+        if (node.nodeType === Node.TEXT_NODE) {
+            // Text node - type character by character
+            const text = node.textContent;
+            for (let char of text) {
+                element.innerHTML += char;
+                await sleep(10); // Fast typing for smooth effect
+                chatContainer.scrollTo({
+                    top: chatContainer.scrollHeight,
+                    behavior: 'smooth'
+                });
+            }
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+            // Element node - add instantly or type content
+            if (node.tagName === 'UL' || node.tagName === 'OL') {
+                // Add list structure instantly
+                const listClone = node.cloneNode(true);
+                element.appendChild(listClone);
+                await sleep(100);
+            } else if (node.tagName === 'P') {
+                // Type paragraph content
+                const p = document.createElement('p');
+                element.appendChild(p);
+                
+                for (let child of node.childNodes) {
+                    if (child.nodeType === Node.TEXT_NODE) {
+                        for (let char of child.textContent) {
+                            p.innerHTML += char;
+                            await sleep(10);
+                        }
+                    } else {
+                        // Bold, italic, code tags
+                        p.appendChild(child.cloneNode(true));
+                        await sleep(20);
+                    }
+                }
+            } else {
+                // Other elements (br, strong, em, code)
+                element.appendChild(node.cloneNode(true));
+                await sleep(20);
+            }
+            
+            chatContainer.scrollTo({
+                top: chatContainer.scrollHeight,
+                behavior: 'smooth'
+            });
+        }
+    }
 }
 
 // Helper function for delay
@@ -186,9 +312,9 @@ function showTypingIndicator() {
     const typingDiv = document.createElement('div');
     typingDiv.className = 'typing-message';
     typingDiv.innerHTML = `
-        <div class="message-avatar">🦙</div>
+        <div class="message-avatar">🤖</div>
         <div class="message-content">
-            <span class="typing-text">Llama is typing</span>
+            <span class="typing-text">Typing</span>
             <div class="typing-dots">
                 <span></span>
                 <span></span>

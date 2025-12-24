@@ -519,5 +519,121 @@ body {
     }
 }
 
+/* ========== RICH TEXT FORMATTING IN MESSAGES ========== */
+
+/* Paragraphs in messages */
+.message-content p {
+    margin: 0 0 12px 0;
+    line-height: 1.6;
+}
+
+.message-content p:last-child {
+    margin-bottom: 0;
+}
+
+/* Bold text */
+.message-content strong {
+    font-weight: 700;
+    color: #1976D2;  /* Blue for emphasis */
+}
+
+.message.user .message-content strong {
+    color: #ffffff;  /* White in user messages */
+    font-weight: 700;
+}
+
+/* Italic text */
+.message-content em {
+    font-style: italic;
+    color: #424242;
+}
+
+.message.user .message-content em {
+    color: #e3f2fd;
+}
+
+/* Inline code */
+.message-content code {
+    background: #f5f5f5;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    color: #d32f2f;
+}
+
+.message.user .message-content code {
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+}
+
+/* Bullet lists */
+.message-content ul {
+    margin: 12px 0;
+    padding-left: 24px;
+    list-style-type: disc;
+}
+
+.message-content ul li {
+    margin: 6px 0;
+    line-height: 1.6;
+}
+
+/* Numbered lists */
+.message-content ol {
+    margin: 12px 0;
+    padding-left: 24px;
+    list-style-type: decimal;
+}
+
+.message-content ol li {
+    margin: 6px 0;
+    line-height: 1.6;
+}
+
+/* Nested lists */
+.message-content ul ul,
+.message-content ol ul,
+.message-content ul ol,
+.message-content ol ol {
+    margin: 4px 0;
+    padding-left: 20px;
+}
+
+/* Line breaks */
+.message-content br {
+    display: block;
+    margin: 8px 0;
+    content: "";
+}
+
+/* Headings in messages (optional) */
+.message-content h1,
+.message-content h2,
+.message-content h3 {
+    margin: 16px 0 8px 0;
+    font-weight: 600;
+    color: #1976D2;
+}
+
+.message-content h1 { font-size: 18px; }
+.message-content h2 { font-size: 16px; }
+.message-content h3 { font-size: 15px; }
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+    .message-content ul,
+    .message-content ol {
+        padding-left: 20px;
+    }
+    
+    .message-content p {
+        margin-bottom: 10px;
+    }
+    
+    .message-content code {
+        font-size: 12px;
+    }
+}
 
 
