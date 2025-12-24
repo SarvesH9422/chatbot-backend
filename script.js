@@ -2,10 +2,28 @@ const chatContainer = document.getElementById('chatContainer');
 const userInput = document.getElementById('userInput');
 const sendBtn = document.getElementById('sendBtn');
 const clearBtn = document.getElementById('clearBtn');
-
 const API_URL = window.location.origin + '/api';
 
+
+
+
+
 console.log('API URL:', API_URL);
+
+// Change placeholder based on screen size
+function updatePlaceholder() {
+    if (window.innerWidth <= 768) {
+        userInput.placeholder = 'Text here';
+    } else {
+        userInput.placeholder = 'Type your message here...';
+    }
+}
+
+// Run on load
+updatePlaceholder();
+
+// Run on window resize
+window.addEventListener('resize', updatePlaceholder);
 
 // Auto-resize textarea
 userInput.addEventListener('input', function() {
@@ -30,15 +48,21 @@ async function sendMessage() {
 
     // Disable send button while processing
     sendBtn.disabled = true;
-    sendBtn.textContent = 'Sending...';
+    // sendBtn.textContent = 'Send ⏳';
 
     console.log('Sending message:', message);
 
     // Hide welcome message
-    const welcomeMsg = document.querySelector('.welcome-message');
-    if (welcomeMsg) {
-        welcomeMsg.style.display = 'none';
-    }
+   // Hide welcome message but keep the space
+const welcomeMsg = document.querySelector('.welcome-message');
+if (welcomeMsg) {
+    welcomeMsg.style.transition = 'opacity 0.3s ease, visibility 0.3s ease';
+    welcomeMsg.style.opacity = '0';
+    welcomeMsg.style.visibility = 'hidden';
+    welcomeMsg.style.position = 'absolute'; // Remove from flow after fade
+}
+
+
 
     // Add user message
     addMessage(message, 'user');
@@ -206,7 +230,7 @@ clearBtn.addEventListener('click', async () => {
                 chatContainer.innerHTML = `
                     <div class="welcome-message">
                         <h2>Welcome to Llama AI!</h2>
-                        <p>Start a conversation with me</p>
+                        
                         <p class="info">Powered by Llama 3.3 • Free • Fast</p>
                     </div>
                 `;

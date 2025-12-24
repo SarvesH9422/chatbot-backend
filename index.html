@@ -5,22 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="description" content="AI-powered chatbot using Llama 3.3">
     <meta name="theme-color" content="#6366f1">
-    <title>🦙 Llama AI Chatbot</title>
+    <title>AI Chatbot</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
         <header class="header">
             <div class="header-content">
-                <h1 class="title">🦙 Llama AI Chatbot</h1>
+                <h1 class="title">AI Chatbot</h1>
                 <div class="model-badge">Local • Free • Private</div>
             </div>
         </header>
 
         <div class="chat-container" id="chatContainer">
             <div class="welcome-message">
-                <h2>Welcome to Llama AI!</h2>
-                <p>Running 100% locally on your machine</p>
+                <h2>Welcome!</h2>
+                <p>Powered by Llama 3.3 • Free • Fast</p>
+
+
+
+
                 <p class="info"></p>
             </div>
         </div>
@@ -31,12 +35,8 @@
                 placeholder="Type your message here..."
                 rows="1"
             ></textarea>
-            <button id="sendBtn" class="send-btn">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                    <path d="M22 2L11 13" stroke="currentColor" stroke-width="2"/>
-                    <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2"/>
-                </svg>
-            </button>
+            <button id="sendBtn" class="send-btn">Send</button>
+
             <button id="clearBtn" class="clear-btn">Clear</button>
         </div>
     </div>
