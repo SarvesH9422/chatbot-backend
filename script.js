@@ -191,7 +191,7 @@ if (welcomeMsg) {
     } finally {
         // Re-enable send button
         sendBtn.disabled = false;
-        sendBtn.textContent = 'Send';
+        sendBtn.classList.remove('loading');
     }
 }
 
