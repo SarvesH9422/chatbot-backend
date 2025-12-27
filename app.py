@@ -187,9 +187,21 @@ def security_checks():
     path = request.path.lower()
     method = request.method
     referrer = request.headers.get('Referer', 'Direct')
-    
+
+    WORDPRESS_SIGNATURES = ['/wp-', '/wp-content', '/wp-includes', 'wp-admin', 'wp-login']
+
+    for sig in WORDPRESS_SIGNATURES:
+        if sig in path:
+            suspicious_ips[real_ip] += 1
+            logger.warning(f"🚨 WordPress pattern hit: {real_ip} → {path}")
+
     # Log all requests with real IP
     logger.info(f"📍 {method} {path} | IP: {real_ip} | UA: {user_agent[:60]}")
+
+    # If this IP is already over threshold, block hard
+    if suspicious_ips[real_ip] >= 5:
+        blocked_ips.add(real_ip)
+
     
     # Bot detection
     is_bot_request, bot_reason = is_bot()
@@ -491,3 +503,4 @@ if __name__ == '__main__':
     print(f"🛡️ Security: IP tracking, bot blocking, rate limiting enabled")
     print(f"📊 Monitoring: Real IP logging active")
     app.run(host='0.0.0.0', port=port, debug=False)
+
